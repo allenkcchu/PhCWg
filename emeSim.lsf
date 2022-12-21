@@ -1,0 +1,208 @@
+switchtolayout;
+closeall;
+deleteall;
+
+#path = 'results\';
+#testCat = 'BandEdgeSweep';
+
+LatticeConstant = 405e-9;
+r = 115e-9;
+s1x = 0e-9;
+s1y = 0e-9;
+s2x = 0e-9;
+s2y = -200e-9;
+coreIndex = 2.7;
+thickness = 300e-9;
+WG_length = 96.6e-6;
+
+backgroundIndex = 1.44;
+
+a = LatticeConstant;
+L_taper = 1e-6;
+xNum = 4;
+yNum = 10;
+hSi = thickness;
+wSi = 2*(0.5*3^0.5*a*(yNum-1));
+L = a*(xNum-1);
+
+#x0 = 0.5*(L-(xNum-1)*a);
+x0 = 0;
+y0 = 0.5*3^0.5*a;
+
+addrect;
+set('name','Slab');
+set('index',coreIndex);
+set('x min',0);set('x max',L);
+set('y',0);set('y span',wSi*1.5);
+set('z min',0);set('z max',hSi);
+
+for(N=0;N<yNum;N=N+1){
+    for(M=0;M<xNum;M=M+1){
+        if(mod(N,2) == 0){
+            if (N == 0){
+                addcircle;
+                set('name','hole');
+                #set('material','SiO2 (Glass) - Palik');
+                set('index',backgroundIndex);
+                set('x',x0+a*M+s1x);
+                set('y',y0+0.5*3^0.5*a*N+s1y);
+                set('radius',r);
+                set('z min',0);set('z max',hSi);
+                addtogroup('PhC');
+                
+                addcircle;
+                set('name','hole');
+                #set('material','SiO2 (Glass) - Palik');
+                set('index',backgroundIndex);
+                set('x',x0+a*M+s1x);
+                set('y',-y0-0.5*3^0.5*a*N-s1y);
+                set('radius',r);
+                set('z min',0);set('z max',hSi);
+                addtogroup('PhC');
+                }
+            else{
+                addcircle;
+                set('name','hole');
+                #set('material','SiO2 (Glass) - Palik');
+                set('index',backgroundIndex);
+                set('x',x0+a*M);
+                set('y',y0+0.5*3^0.5*a*N);
+                set('radius',r);
+                set('z min',0);set('z max',hSi);
+                addtogroup('PhC');
+                
+                addcircle;
+                set('name','hole');
+                #set('material','SiO2 (Glass) - Palik');
+                set('index',backgroundIndex);
+                set('x',x0+a*M);
+                set('y',-y0-0.5*3^0.5*a*N);
+                set('radius',r);
+                set('z min',0);set('z max',hSi);
+                addtogroup('PhC');    
+                }
+            }
+        }
+    }
+    
+for(N=0;N<yNum;N=N+1){
+    for(M=-1;M<xNum;M=M+1){
+        if(mod(N,2) == 1){
+            if (N == 1) {
+                addcircle;
+                set('name','hole');
+                #set('material','SiO2 (Glass) - Palik');
+                set('index',backgroundIndex);
+                set('x',x0+a*M+0.5*a+s2x);
+                set('y',y0+0.5*3^0.5*a*N+s2y);
+                set('radius',r);
+                set('z min',0);set('z max',hSi);
+                addtogroup('PhC');
+                
+                addcircle;
+                set('name','hole');
+                #set('material','SiO2 (Glass) - Palik');
+                set('index',backgroundIndex);
+                set('x',x0+a*M+0.5*a+s2x);
+                set('y',-y0-0.5*3^0.5*a*N-s2y);
+                set('radius',r);
+                set('z min',0);set('z max',hSi);
+                addtogroup('PhC'); 
+                }
+            else{
+                addcircle;
+                set('name','hole');
+                #set('material','SiO2 (Glass) - Palik');
+                set('index',backgroundIndex);
+                set('x',x0+a*M+0.5*a);
+                set('y',y0+0.5*3^0.5*a*N);
+                set('radius',r);
+                set('z min',0);set('z max',hSi);
+                addtogroup('PhC');
+                
+                addcircle;
+                set('name','hole');
+                #set('material','SiO2 (Glass) - Palik');
+                set('index',backgroundIndex);
+                set('x',x0+a*M+0.5*a);
+                set('y',-y0-0.5*3^0.5*a*N);
+                set('radius',r);
+                set('z min',0);set('z max',hSi);
+                addtogroup('PhC'); 
+                }           
+            }    
+        }
+    }
+
+#addmesh;
+#set('x min',0);set('x max',L);
+#set('y',0);set('y span',wSi*1.5);
+#set('z min',0);set('z max',hSi);
+#set('override x mesh',1);
+#set('override y mesh',1);
+#set('override z mesh',0);
+#set('dx',LatticeConstant/coreIndex/10);
+#set('dy',LatticeConstant/coreIndex/10);
+
+select('Slab');
+#simCenterX = get('x');
+simCenterY = get('y');
+simSpanY = get('y span');
+
+addeme;
+set('solver type','3D: X Prop');
+#set('background material','SiO2 (Glass) - Palik');
+set('index',backgroundIndex);
+set('wavelength',1550e-9);
+#set('x min',simCenterX-0.5*LatticeConstant+0.25*3^0.5*LatticeConstant);
+set('x min',s1x+0.25*3^0.5*LatticeConstant);
+#set('x min',LatticeConstant);
+set('y',simCenterY);
+set('z min',-500e-9);
+set('z max',thickness+500e-9);
+set('energy conservation','conserve energy');
+set('y span',7e-6);
+set('number of modes for all cell groups',20);
+set('display cells',1);
+set('group spans',LatticeConstant);
+set('subcell method',1);
+set('cells',50);
+set('periods',round(WG_length/LatticeConstant));
+set('y min bc','metal');
+set('y max bc','metal');
+set('z min bc','metal');
+set('z max bc','metal');
+
+select('EME::Ports::port_1');
+set('mode selection','fundamental TE mode');
+select('EME::Ports::port_2');
+set('mode selection','fundamental TE mode');
+
+run;
+
+# set propagation sweep settings
+setemeanalysis("wavelength sweep",1);
+setemeanalysis("start wavelength",1500e-9);
+setemeanalysis("stop wavelength",1600e-9);
+setemeanalysis("number of wavelength points",201);
+
+emesweep("wavelength sweep");
+
+S = getemesweep('S_wavelength_sweep');
+
+# plot S21 vs group span
+s21 = S.s21;
+wavelength = S.wavelength;
+f = c/wavelength;
+w = 2*pi*f;
+phi = unwrap(angle(s21));
+
+w2 = 0.5*(w(2:length(w))+w(1:length(w)-1));
+gd = (phi(2:length(phi))-phi(1:length(phi)-1))/(w(2:length(w))-w(1:length(w)-1));
+
+l2 = c/w2*2*pi;
+plot(wavelength*1e9,10*log10(abs(s21)^2));
+ng = c*gd/(round(WG_length/LatticeConstant)*LatticeConstant);
+plot(l2*1e9,abs(ng));
+
+#matlabsave(path+testCat+'_Thickness'+num2str(thickness*1e9)+'_a'+num2str(LatticeConstant*1e9)+'_r'+num2str(r*1e9)+'_n'+num2str(coreIndex*100)+'_s1x'+num2str(s1x*1e9)+'_s1y'+num2str(s1y*1e9)+'_s2x'+num2str(s2x*1e9)+'_s2y'+num2str(s2y*1e9),wavelength,s21,l2,ng);
